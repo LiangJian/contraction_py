@@ -38,13 +38,13 @@ class Tensor:
 
         self.rule = nickname1 + ',' + nickname2
 
-        same = "".join([s for s in nickname2 if s in nickname1])
+        same = [s for s in y_.N if s in self.N]
 
-        left2 = "".join([s for s in nickname2 if s not in same])
+        left2 =[s for s in y_.N if s not in same]
 
-        left1 = "".join([s for s in nickname1 if s not in same])
+        left1 =[s for s in self.N if s not in same]
 
-        new_name = [ s for s in left1 + left2 ]
+        new_name = [ s for s in left1 +  left2 ]
 
         if result_str_ != tuple(''):
             self.rule += '->'
@@ -69,7 +69,12 @@ class Tensor:
                 return self.rule, Tensor(name_=result_str_, t_=np.einsum(self.rule, self.T, y_.T))
 
 
-        self.rule += left1 + left2
+
+        for s in left1:
+            self.rule += nickname1_dict[left1[s]]
+        for s in left2:
+            self.rule += nickname2_dict[left2[s]]
+
         if conjugate_:
             return self.rule, Tensor(name_=tuple(new_name), t_=np.einsum(self.rule, self.T, y_.T.conjugate()))
         else:

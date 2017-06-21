@@ -25,3 +25,4 @@ C = P.contract(Q, conjugate_=True, result_str_=('x1',  'x2'))
 print(C[0], C[1].N, C[1].T.shape)
 end = time.time()
 print('%f s used' % (end-start))
+
