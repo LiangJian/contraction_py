@@ -12,7 +12,8 @@ class Var(np.ndarray):
         binningLogicSystem      = None, # binning
         shape                   = None,
         filename                = '',
-        conf_names               = None,
+        conf_names              = None,
+        conf_num                = None,
         endian                  = '<',
         data                    = None
         ):
@@ -42,23 +43,27 @@ class Var(np.ndarray):
         if data is not None:
             self = np.array(data).view(cls)
 
-        if conf_names is not None:
-            tmp_ = Var(filename=conf_names[0])
+        if conf_names is not None and conf_num is not None:
+            file_names_ = []
+            for ic in range(conf_num[0], conf_num[1], conf_num[2]):
+                file_names_.append(conf_names%ic)
+
+            tmp_ = Var(filename=file_names_[0])
             shape_ = np.array(tmp_.shape)
-            shape_[tmp_.find_name(name_='conf')] = len(conf_names)
+            shape_[tmp_.find_name(name_='conf')] = len(file_names_)
             self = np.zeros(shape=shape_).view(cls).view(cls)
 
-            head_data_ = np.fromfile(conf_names[0], dtype=HeadType, count=1)[0]
+            head_data_ = np.fromfile(file_names_[0], dtype=HeadType, count=1)[0]
             n_dims_ = head_data_['head']['n_dims']
             type_ = head_data_['head']['one_dim']['type'][0:n_dims_]
             typename_ = [typename[i] for i in type_]
             n_indices_ = head_data_['head']['one_dim']['n_indices'][0:n_dims_]
             indices_ = head_data_['head']['one_dim']['indices'][0:n_dims_]
 
-            n_indices_[tmp_.find_name(name_='conf')] = len(conf_names)
+            n_indices_[tmp_.find_name(name_='conf')] = len(file_names_)
 
-            for i in range(len(conf_names)):
-                tmp_ = Var(filename=conf_names[i])
+            for i in range(len(file_names_)):
+                tmp_ = Var(filename=file_names_[i])
                 self[i,...] = tmp_
                 indices_[tmp_.find_name(name_='conf')][i] = tmp_.indices['conf'][0]
 
@@ -69,7 +74,6 @@ class Var(np.ndarray):
             self.index = {}
             for i in range(n_dims_):
                 self.index[typename_[i]] = i
-
 
         if filename != '':
             head_data_ = np.fromfile(filename, dtype=HeadType, count=1)[0]
@@ -112,7 +116,6 @@ class Var(np.ndarray):
             exit(-1)
         #return jack(self,index_)
 
-
 d = Var()
 print(d.shape)
 a = Var(shape=(2,2))
@@ -131,12 +134,8 @@ print(a[0,0,0,0,1,0,0])
 print(a.flat[0])
 print(a.flat[-1])
 
-b = Var(conf_names=["rbc_conf_2464_m0.005_0.04_000495_hyp.2pt.dov.glue.data",
-                    "rbc_conf_2464_m0.005_0.04_000495_hyp.2pt.dov.glue.data"])
+b = Var(conf_names="rbc_conf_2464_m0.005_0.04_%06d_hyp.2pt.dov.glue.data", conf_num=(495,535+1,40))
 print(b.shape)
-print(np.nonzero(b[0,...]-b[1,...]))
 print(b.indices['conf'])
-print(b.find_name(name_='conf'))
 print(b[0,0,0,0,1,0,0])
-print(b.flat[0])
 print(b.flat[-1])
