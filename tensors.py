@@ -84,6 +84,7 @@ class Tensor:
                 return self.rule, Tensor(name_=result_str_, t_=np.einsum(self.rule, self.T, y_.T))
 
 
+
         for s in left1:
             self.rule += nickname1_dict[left1[s]]
         for s in left2:
