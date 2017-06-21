@@ -18,13 +18,11 @@ class Tensor:
 
     def contract(self, y_, conjugate_=False, result_str_=tuple('')):
         count = 0
-        nickname1 = ''
-        nickname1_dict = {}
-        for s in self.N:
-            nickname1 += list(string.ascii_lowercase)[count]
-            nickname1_dict[s] = list(string.ascii_lowercase)[count]
-            count += 1
-        nickname2 = ''
+        alphabeta=string.ascii_lowercase
+        nickname1 = alphabeta[:len(self.N)]
+        nickname1_dict = {i:j for i,j in zip(self.N,list(nickname1))}
+
+        nickname2 = ''#TODO
         nickname2_dict = {}
         for s in range(len(y_.N)):
             if y_.N[s] in self.N:
@@ -35,39 +33,23 @@ class Tensor:
                 nickname2_dict[y_.N[s]] = list(string.ascii_lowercase)[count]
                 count += 1
 
-        self.rule = nickname1
-        self.rule += ','
-        self.rule += nickname2
-        self.rule += '->'
+        same_name_list = [s for s in self.N if s in y_.N]
+        new_name_list = self.N + [s in y_.N if s not in same_name_list]
 
-        count = 0
-        same = ''
-        for s2 in nickname2:
-            if s2 in nickname1:
-                count += 1
-                same += s2
+        self.rule = nickname1 + ',' + nickname2
 
-        left2 = ''
-        for s2 in nickname2:
-            if s2 not in same:
-                left2 += s2
+        same = "".join([s for s in nickname2 if s in nickname1])
 
-        left1 = ''
-        for s1 in nickname1:
-            if s1 not in same:
-                left1 += s1
+        left2 = "".join([s for s in nickname2 if s not in same])
 
-        new_name = []
-        for s in left1:
-            new_name.append(s)
-        for s in left2:
-            new_name.append(s)
+        left1 = "".join([s for s in nickname1 if s not in same])
+
+        new_name = [ s for s in left1 + left2 ]
 
         if result_str_ != tuple(''):
-            for s in new_name:
-                if s in result_str_:
-                    continue
-                else:
+            self.rule += '->'
+            for s in new_name: #TODO
+                if s not in result_str_:
                     print('wrong rule...')
                     exit(-1)
             nickname3 = ''
@@ -81,11 +63,14 @@ class Tensor:
                         print('wong rule...')
                         exit(-1)
             self.rule += nickname3
-            return self.rule, Tensor(name_=result_str_, t_=np.einsum(self.rule, self.T, y_.T.conjugate()))
+            if conjugate_:
+                return self.rule, Tensor(name_=result_str_, t_=np.einsum(self.rule, self.T, y_.T.conjugate()))
+            else:
+                return self.rule, Tensor(name_=result_str_, t_=np.einsum(self.rule, self.T, y_.T))
 
 
         self.rule += left1 + left2
         if conjugate_:
-            return self.rule, Tensor(name_=tuple(new_name), t_=np.einsum(self.rule, self.T, y_.T))
-        else:
             return self.rule, Tensor(name_=tuple(new_name), t_=np.einsum(self.rule, self.T, y_.T.conjugate()))
+        else:
+            return self.rule, Tensor(name_=tuple(new_name), t_=np.einsum(self.rule, self.T, y_.T))

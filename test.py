@@ -12,12 +12,16 @@ import time
 # print(X.contract(Y, result_str_=('a', 'c', 'e', 'd'))[0])
 
 
-dims = (24, 24, 24, 64, 4, 3, 4, 3)
+dims1 = ( 64, 4, 3, 4, 3)
+dims1_name = ('x1', 'a1', 'c1', 'a2', 'c2')
 
-P = Tensor(dims, ('x', 'y', 'z', 't', 'a1', 'c1', 'a2', 'c2'),np.random.random(dims))
-Q = Tensor(dims, ('x', 'y', 'z', 't', 'a2', 'c2', 'a3', 'c1'),np.random.random(dims))
+dims2 = (24,  4, 3, 4, 3)
+dims2_name = ('x2', 'a2', 'c2', 'a1', 'c1')
+
+P = Tensor(dims1,dims1_name,np.random.random(dims1))
+Q = Tensor(dims2,dims2_name,np.random.random(dims2))
 start = time.time()
-C = P.contract(Q, conjugate_=True, result_str_=('x', 'y', 'z', 't'))
+C = P.contract(Q, conjugate_=True, result_str_=('x1',  'x2'))
 print(C[0], C[1].N, C[1].T.shape)
 end = time.time()
 print('%f s used' % (end-start))
