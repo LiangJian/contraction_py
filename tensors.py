@@ -42,26 +42,23 @@ class Tensor:
 
         count = 0
         same = ''
-        for s2 in nickname2:
-            if s2 in nickname1:
+        for s2 in y_.N:
+            if s2 in self.N:
                 count += 1
                 same += s2
 
-        left2 = ''
-        for s2 in nickname2:
+        left2 = []
+        for s2 in y_.N:
             if s2 not in same:
-                left2 += s2
+                left2.append(s2)
 
-        left1 = ''
-        for s1 in nickname1:
+        left1 = []
+        for s1 in self.N:
             if s1 not in same:
-                left1 += s1
+                left1.append(s1)
 
-        new_name = []
-        for s in left1:
-            new_name.append(s)
-        for s in left2:
-            new_name.append(s)
+        new_name = tuple(left1 + left2)
+
 
         if result_str_ != tuple(''):
             for s in new_name:
@@ -81,11 +78,19 @@ class Tensor:
                         print('wong rule...')
                         exit(-1)
             self.rule += nickname3
-            return self.rule, Tensor(name_=result_str_, t_=np.einsum(self.rule, self.T, y_.T.conjugate()))
+            if conjugate_:
+                return self.rule, Tensor(name_=result_str_, t_=np.einsum(self.rule, self.T, y_.T.conjugate()))
+            else:
+                return self.rule, Tensor(name_=result_str_, t_=np.einsum(self.rule, self.T, y_.T))
 
 
-        self.rule += left1 + left2
+        for s in left1:
+            self.rule += nickname1_dict[left1[s]]
+        for s in left2:
+            self.rule += nickname2_dict[left2[s]]
+
         if conjugate_:
-            return self.rule, Tensor(name_=tuple(new_name), t_=np.einsum(self.rule, self.T, y_.T))
-        else:
             return self.rule, Tensor(name_=tuple(new_name), t_=np.einsum(self.rule, self.T, y_.T.conjugate()))
+        else:
+            return self.rule, Tensor(name_=tuple(new_name), t_=np.einsum(self.rule, self.T, y_.T))
+
