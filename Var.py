@@ -38,12 +38,6 @@ class Var(np.ndarray):
 
         self = np.zeros(shape=shape).view(cls)
 
-        n_dims =np.empty(0)
-        type = np.empty(0)
-        typename = np.empty(0)
-        n_indices = np.empty(0)
-        indices = np.empty(0)
-
         if filename != '':
             head_data = np.fromfile(filename, dtype=HeadType, count=1)[0]
             n_dims = head_data['head']['n_dims']
@@ -64,8 +58,6 @@ class Var(np.ndarray):
         self.numberOfBins       = numberOfBins
         self.binningLogicSystem = binningLogicSystem
         self.index              = index
-
-        self.n_dims             = n_dims
 
         return self
 
