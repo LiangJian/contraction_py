@@ -2,25 +2,38 @@ import numpy as np
 import os.path
 
 def mass_eff_cosh(src,index_t):
-  return np.arccosh((np.roll(src,+1,index_t)+np.roll(src,-1,index_t))/(2.*src))
+    return np.arccosh((np.roll(src,+1,index_t)+np.roll(src,-1,index_t))/(2.*src))
 
 
 def mass_eff_log(src,index_t):
-  return np.log(np.roll(src,+1,index_t)/src)
+    return np.log(np.roll(src,+1,index_t)/src)
 
 
 def get_std_error(src,index_conf):
-  return np.std(src,index_conf)/np.sqrt(src.shape[index_conf])
+    return np.std(src,index_conf)/np.sqrt(src.shape[index_conf])
 
 
 def do_jack(src,index_conf):
-  tmp=np.sum(src,index_conf,keepdims=True)
-  return (tmp-src)/(src.shape[index_conf]-1)
+    tmp=np.sum(src,index_conf,keepdims=True)
+    return (tmp-src)/(src.shape[index_conf]-1)
 
 
 def get_jack_error(src,index_conf):
-  return np.std(src,index_conf)/np.sqrt(src.shape[index_conf])*(src.shape[index_conf]-1.)
+    return np.std(src,index_conf)/np.sqrt(src.shape[index_conf])*(src.shape[index_conf]-1.)
 
+
+def combine(a_, b_, index_name_=''):
+    index = a_.find_name(index_name_)
+    # check heads of a and b
+    tmp = np.concatenate((a_, b_), axis=index)
+    tmp = Var(data=tmp, init_method='array data')
+    tmp.head_data = a_.head_data
+    tmp.head_data_['head']['one_dim']['n_indices'][index] = a_.shape[index] + b_.shape[index]
+    for i in range(b_.shape[index]):
+        tmp.head_data_['head']['one_dim']['indices'][index][a_.shape[index]+i] =\
+         b_.head_data_['head']['one_dim']['indices'][index][i]
+    tmp.update_meta()
+    print(a_.head_data)
 
 class Var(np.ndarray):
 
@@ -64,6 +77,9 @@ class Var(np.ndarray):
                     "evenodd", "disp_x", "disp_y", "disp_z", "disp_t",
                     "t3", "t4", "t_source","t_current", "t_sink",
                     "bootstrap", "nothing"]
+
+        init_methods = []
+        # CHECK METHOD
 
         self = np.zeros(0).view(cls)
         if init_method == 'shape': # init from shape
@@ -251,3 +267,6 @@ class Var(np.ndarray):
     def save(self):
         np.save(self.name, self)
         np.save(self.name+'_meta', self.head_data)
+
+    def update_meta(self): #TODO
+        print('to do')
