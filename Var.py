@@ -1,6 +1,7 @@
 import numpy as np
 import os.path
 
+
 def mass_eff_cosh(src,index_t):
     return np.arccosh((np.roll(src,+1,index_t)+np.roll(src,-1,index_t))/(2.*src))
 
@@ -34,6 +35,7 @@ def combine(a_, b_, index_name_=''):
          b_.head_data_['head']['one_dim']['indices'][index][i]
     tmp.update_meta()
     print(a_.head_data)
+
 
 class Var(np.ndarray):
 
@@ -120,7 +122,6 @@ class Var(np.ndarray):
                 for ic in range(scatter_num[0], scatter_num[1], scatter_num[2]):
                     if os.path.isfile(scatter_file_name % ic):
                         file_names_.append(scatter_file_name % ic)
-                print(file_names_)
 
                 tmp_ = Var(filename=file_names_[0], init_method="iog_file")
                 shape_ = np.array(tmp_.shape)
