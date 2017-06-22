@@ -17,26 +17,29 @@ class Var(np.ndarray):
         endian                  = '<',
         data                    = None
         ):
-        HeadType = np.dtype([
-            ('head', [
-                ('n_dims', 'i4'),
-                ('one_dim', [
-                    ('type', 'i4'),
-                    ('n_indices', 'i4'),
-                    ('indices', 'i4', 1024)
-                ], 16)
-            ])
-        ])
+        HeadType = np.dtype(
+            [('head',
+              [('n_dims', 'i4'),('one_dim',
+                                 [('type', 'i4'),('n_indices', 'i4'),('indices', 'i4', 1024)
+                                  ], 16)
+               ])
+             ]
+        )
         typename = ["other", "x", "y", "z", "t", "d", "c", "d2",
-                    "c2", "complex", "mass", "smear", "displacement", "s_01", "s_02", "s_03",
-                    "s_11", "s_12", "s_13", "d_01", "d_02", "d_03", "d_11", "d_12",
-                    "d_13", "conf", "operator", "momentum", "direction", "t2", "mass2", "column",
-                    "row", "temporary", "temporary2", "temporary3", "temporary4", "errorbar", "operator2", "param",
-                    "fit_left", "fit_right", "jackknife", "jackknife2", "jackknife3", "jackknife4", "summary",
-                    "channel",
-                    "channel2", "eigen", "d_row", "d_col", "c_row", "c_col", "parity", "noise",
-                    "evenodd", "disp_x", "disp_y", "disp_z", "disp_t", "t3", "t4", "t_source",
-                    "t_current", "t_sink", "bootstrap", "nothing"]
+                    "c2", "complex", "mass", "smear", "displacement",
+                    "s_01", "s_02", "s_03", "s_11", "s_12", "s_13",
+                    "d_01", "d_02", "d_03", "d_11", "d_12",
+                    "d_13", "conf", "operator", "momentum", "direction",
+                    "t2", "mass2", "column", "row",
+                    "temporary", "temporary2", "temporary3", "temporary4",
+                    "errorbar", "operator2", "param",
+                    "fit_left", "fit_right", "jackknife", "jackknife2",
+                    "jackknife3", "jackknife4", "summary",
+                    "channel", "channel2", "eigen", "d_row", "d_col",
+                    "c_row", "c_col", "parity", "noise",
+                    "evenodd", "disp_x", "disp_y", "disp_z", "disp_t",
+                    "t3", "t4", "t_source","t_current", "t_sink",
+                    "bootstrap", "nothing"]
 
         self = np.zeros(shape=shape).view(cls)
 
@@ -101,6 +104,7 @@ class Var(np.ndarray):
         self.eventWeight        = eventWeight
         self.numberOfBins       = numberOfBins
         self.binningLogicSystem = binningLogicSystem
+        
         return self
 
     def find_name(self, name_=''):
@@ -115,27 +119,3 @@ class Var(np.ndarray):
             print("no index conf")
             exit(-1)
         #return jack(self,index_)
-
-d = Var()
-print(d.shape)
-a = Var(shape=(2,2))
-b = Var(shape=(2,2,2))
-a = b
-print(a.shape)
-
-a = Var(filename="rbc_conf_2464_m0.005_0.04_000495_hyp.2pt.dov.glue.data")
-print(a.shape)
-print(a.indices['momentum'])
-print(a.indices[a.type[a.index['momentum']]])
-print(a.type)
-print(a.index['momentum'])
-print(a.find_name(name_='momentum'))
-print(a[0,0,0,0,1,0,0])
-print(a.flat[0])
-print(a.flat[-1])
-
-b = Var(conf_names="rbc_conf_2464_m0.005_0.04_%06d_hyp.2pt.dov.glue.data", conf_num=(495,535+1,40))
-print(b.shape)
-print(b.indices['conf'])
-print(b[0,0,0,0,1,0,0])
-print(b.flat[-1])
