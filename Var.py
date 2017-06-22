@@ -1,4 +1,5 @@
 import numpy as np
+import os.path
 
 class Var(np.ndarray):
 
@@ -51,7 +52,8 @@ class Var(np.ndarray):
         if scatter_file_name is not None and scatter_num is not None and scatter_index_name is not None and not load:
             file_names_ = []
             for ic in range(scatter_num[0], scatter_num[1], scatter_num[2]):
-                file_names_.append(scatter_file_name%ic)
+                if os.path.isfile(scatter_file_name%ic):
+                    file_names_.append(scatter_file_name%ic)
 
             tmp_ = Var(filename=file_names_[0])
             shape_ = np.array(tmp_.shape)
@@ -84,7 +86,8 @@ class Var(np.ndarray):
         if scatter_file_name is not None and scatter_num is not None and scatter_index_name is not None and load:
             file_names_ = []
             for ic in range(scatter_num[0], scatter_num[1], scatter_num[2]):
-                file_names_.append(scatter_file_name%ic)
+                if os.path.isfile(scatter_file_name % ic):
+                    file_names_.append(scatter_file_name%ic)
 
             tmp_ = Var(name=file_names_[0],load=load)
             shape_ = np.array(tmp_.shape)
