@@ -263,7 +263,28 @@ class Var(np.ndarray):
         if index_ == -1:
             print("no index conf")
             exit(-1)
-        return do_jack(self,index_)
+        return mass_eff_log(self,index_)
+
+    def eff_mass_cosh(self):
+        index_ = self.find_name("t")
+        if index_ == -1:
+            print("no index conf")
+            exit(-1)
+        return mass_eff_cosh(self,index_)
+
+    def get_std_error(self):
+        index_ = self.find_name("conf")
+        if index_ == -1:
+            print("no index conf")
+            exit(-1)
+        return get_std_error(self,index_)
+
+    def get_jack_error(self):
+        index_ = self.find_name("conf")
+        if index_ == -1:
+            print("no index conf")
+            exit(-1)
+        return get_jack_error(self,index_)
 
     def save(self):
         np.save(self.name, self)
