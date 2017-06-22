@@ -4,7 +4,7 @@ class Var(np.ndarray):
 
     def __new__(
         cls,
-        name                    = "trk_pt",
+        name                    = "",
         tree                    = None, # tree object
         eventNumber             = None,
         eventWeight             = None,
@@ -12,10 +12,12 @@ class Var(np.ndarray):
         binningLogicSystem      = None, # binning
         shape                   = None,
         filename                = '',
-        conf_names              = None,
-        conf_num                = None,
+        scatter_file_name       = None,
+        scatter_num             = None,
+        scatter_index_name      = None,
         endian                  = '<',
-        data                    = None
+        data                    = None,
+        load                    = False
         ):
         HeadType = np.dtype(
             [('head',
@@ -46,29 +48,29 @@ class Var(np.ndarray):
         if data is not None:
             self = np.array(data).view(cls)
 
-        if conf_names is not None and conf_num is not None:
+        if scatter_file_name is not None and scatter_num is not None and scatter_index_name is not None and not load:
             file_names_ = []
-            for ic in range(conf_num[0], conf_num[1], conf_num[2]):
-                file_names_.append(conf_names%ic)
+            for ic in range(scatter_num[0], scatter_num[1], scatter_num[2]):
+                file_names_.append(scatter_file_name%ic)
 
             tmp_ = Var(filename=file_names_[0])
             shape_ = np.array(tmp_.shape)
-            shape_[tmp_.find_name(name_='conf')] = len(file_names_)
+            shape_[tmp_.find_name(name_=scatter_index_name)] = len(file_names_)
             self = np.zeros(shape=shape_).view(cls).view(cls)
 
-            head_data_ = np.fromfile(file_names_[0], dtype=HeadType, count=1)[0]
+            head_data_ = tmp_.head_data
             n_dims_ = head_data_['head']['n_dims']
             type_ = head_data_['head']['one_dim']['type'][0:n_dims_]
             typename_ = [typename[i] for i in type_]
             n_indices_ = head_data_['head']['one_dim']['n_indices'][0:n_dims_]
             indices_ = head_data_['head']['one_dim']['indices'][0:n_dims_]
 
-            n_indices_[tmp_.find_name(name_='conf')] = len(file_names_)
+            n_indices_[tmp_.find_name(name_=scatter_index_name)] = len(file_names_)
 
             for i in range(len(file_names_)):
                 tmp_ = Var(filename=file_names_[i])
                 self[i,...] = tmp_
-                indices_[tmp_.find_name(name_='conf')][i] = tmp_.indices['conf'][0]
+                indices_[tmp_.find_name(name_=scatter_index_name)][i] = tmp_.indices[scatter_index_name][0]
 
             self.indices = {}
             for i in range(n_dims_):
@@ -77,6 +79,40 @@ class Var(np.ndarray):
             self.index = {}
             for i in range(n_dims_):
                 self.index[typename_[i]] = i
+            self.head_data = head_data_
+
+        if scatter_file_name is not None and scatter_num is not None and scatter_index_name is not None and load:
+            file_names_ = []
+            for ic in range(scatter_num[0], scatter_num[1], scatter_num[2]):
+                file_names_.append(scatter_file_name%ic)
+
+            tmp_ = Var(name=file_names_[0],load=load)
+            shape_ = np.array(tmp_.shape)
+            shape_[tmp_.find_name(name_=scatter_index_name)] = len(file_names_)
+            self = np.zeros(shape=shape_).view(cls).view(cls)
+
+            head_data_ = tmp_.head_data
+            n_dims_ = head_data_['head']['n_dims']
+            type_ = head_data_['head']['one_dim']['type'][0:n_dims_]
+            typename_ = [typename[i] for i in type_]
+            n_indices_ = head_data_['head']['one_dim']['n_indices'][0:n_dims_]
+            indices_ = head_data_['head']['one_dim']['indices'][0:n_dims_]
+
+            n_indices_[tmp_.find_name(name_=scatter_index_name)] = len(file_names_)
+
+            for i in range(len(file_names_)):
+                tmp_ = Var(name=file_names_[i], load=load)
+                self[i,...] = tmp_
+                indices_[tmp_.find_name(name_=scatter_index_name)][i] = tmp_.indices[scatter_index_name][0]
+
+            self.indices = {}
+            for i in range(n_dims_):
+                self.indices[typename_[i]] = indices_[i][0:n_indices_[i]]
+            self.type = typename_
+            self.index = {}
+            for i in range(n_dims_):
+                self.index[typename_[i]] = i
+            self.head_data = head_data_
 
         if filename != '':
             head_data_ = np.fromfile(filename, dtype=HeadType, count=1)[0]
@@ -97,14 +133,33 @@ class Var(np.ndarray):
             self.index = {}
             for i in range(n_dims_):
                 self.index[typename_[i]] = i
+            self.head_data = head_data_
 
-        self._name              = name
+        if load==True:
+            head_data_ = np.load(name+'_meta.npy')
+            n_dims_ = head_data_['head']['n_dims']
+            type_ = head_data_['head']['one_dim']['type'][0:n_dims_]
+            typename_ = [typename[i] for i in type_]
+            n_indices_ = tuple(head_data_['head']['one_dim']['n_indices'][0:n_dims_])
+            indices_ = head_data_['head']['one_dim']['indices'][0:n_dims_]
+
+            self = np.load(name+'.npy').view(cls)
+            self.indices = {}
+            for i in range(n_dims_):
+                self.indices[typename_[i]] = indices_[i][0:n_indices_[i]]
+            self.type = typename_
+            self.index = {}
+            for i in range(n_dims_):
+                self.index[typename_[i]] = i
+            self.head_data = head_data_
+
+        self.name              = name
         self.tree               = tree
         self.eventNumber        = eventNumber
         self.eventWeight        = eventWeight
         self.numberOfBins       = numberOfBins
         self.binningLogicSystem = binningLogicSystem
-        
+
         return self
 
     def find_name(self, name_=''):
@@ -119,3 +174,7 @@ class Var(np.ndarray):
             print("no index conf")
             exit(-1)
         #return jack(self,index_)
+
+    def save(self):
+        np.save(self.name, self)
+        np.save(self.name+'_meta', self.head_data)
