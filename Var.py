@@ -3,24 +3,24 @@ import os.path
 import copy
 
 
-def mass_eff_cosh(src,index_t):
-    return np.arccosh((np.roll(src,+1,index_t)+np.roll(src,-1,index_t))/(2.*src))
+def mass_eff_cosh(src, index_t):
+    return np.arccosh((np.roll(src, +1, index_t)+np.roll(src, -1, index_t))/(2.*src))
 
 
-def mass_eff_log(src,index_t):
-    return np.log(np.roll(src,+1,index_t)/src)
+def mass_eff_log(src, index_t):
+    return np.log(np.roll(src, +1, index_t)/src)
 
 
-def get_std_error(src,index_conf):
-    return np.std(src,index_conf)/np.sqrt(src.shape[index_conf]-1.)
+def get_std_error(src, index_conf):
+    return np.std(src, index_conf)/np.sqrt(src.shape[index_conf]-1.)
 
 
-def do_jack(src,index_conf):
-    tmp=np.sum(src,index_conf,keepdims=True)
+def do_jack(src, index_conf):
+    tmp = np.sum(src, index_conf, keepdims=True)
     return (tmp-src)/(src.shape[index_conf]-1)
 
 
-def get_jack_error(src,index_conf):
+def get_jack_error(src, index_conf):
     return np.std(src, index_conf) * np.sqrt(src.shape[index_conf]-1)
 
 
@@ -38,21 +38,22 @@ def combine(a_, b_, index_name_=''):
     print(a_.head_data)
 
 
-def mod_head_name(head=None,index=0,new_name=''):
+def mod_head_name(head=None, index=0, new_name=''):
     n_dims_ = head['head']['n_dims']
     head['head']['one_dim']['type'][0:n_dims_][index] = np.where(typename == new_name)[0][0]
 
 
-def mod_head_dim_size(head=None,index=0,new_size=0):
+def mod_head_dim_size(head=None, index=0, new_size=0):
     n_dims_ = head['head']['n_dims']
     head['head']['one_dim']['n_indices'][0:n_dims_][index] = new_size
 
-def rm_head_index(head_=None,index_=0):
+
+def rm_head_index(head_=None, index_=0):
     n_dims_ = head_['head']['n_dims']
     head_tmp = copy.deepcopy(head_)
     head_['head']['n_dims'] = n_dims_-1
     count = 0
-    for i in range(0,n_dims_-1):
+    for i in range(0, n_dims_-1):
         if count == index_:
             count += 1
         head_['head']['one_dim'][i] = head_tmp['head']['one_dim'][count]
@@ -147,13 +148,13 @@ class Var(np.ndarray):
                 self.head_data = tmp_.head_data
                 n_dims_ = self.head_data['head']['n_dims']
 
-                self.head_data['head']['one_dim']['n_indices'][0:n_dims_] \
+                self.head_data['head']['one_dim']['n_indices'][0:n_dims_]\
                     [tmp_.find_name(name_=scatter_index_name)] = len(file_names_)
 
                 for i in range(len(file_names_)):
                     tmp_ = Var(filename=file_names_[i], init_method="iog_file")
                     self[i, ...] = tmp_
-                    self.head_data['head']['one_dim']['indices'][0:n_dims_] \
+                    self.head_data['head']['one_dim']['indices'][0:n_dims_ ]\
                         [tmp_.find_name(name_=scatter_index_name)][i] = tmp_.indices[scatter_index_name][0]
 
                 self.update_meta()
@@ -168,7 +169,7 @@ class Var(np.ndarray):
                     if os.path.isfile(scatter_file_name % ic):
                         file_names_.append(scatter_file_name % ic)
 
-                tmp_ = Var(name=file_names_[0],init_method="Var_file")
+                tmp_ = Var(name=file_names_[0], init_method="Var_file")
                 shape_ = np.array(tmp_.shape)
                 shape_[tmp_.find_name(name_=scatter_index_name)] = len(file_names_)
                 self = np.zeros(shape=shape_).view(cls)
@@ -273,7 +274,7 @@ class Var(np.ndarray):
             exit(-1)
         new_head = copy.deepcopy(self.head_data) #FIXME #TODO
         rm_head_index(new_head,index_)
-        return Var(data=np.average(self,index_),head_data=new_head,init_method="array data")
+        return Var(data=np.sum(self,index_)/self.shape[index_],head_data=new_head,init_method="array data")
 
     def save(self):
         np.save(self.name, self)
