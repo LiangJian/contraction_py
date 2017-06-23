@@ -39,20 +39,17 @@ def combine(a_, b_, index_name_=''):
 
 
 def mod_head_name(head=None, index=0, new_name=''):
-    n_dims_ = head['head']['n_dims']
-    head['head']['one_dim']['type'][0:n_dims_][index] = np.where(typename == new_name)[0][0]
+    head['head']['one_dim'][index]['type'] = np.where(typename == new_name)[0][0]
 
 
 def mod_head_dim_size(head=None, index=0, new_size=0):
-    n_dims_ = head['head']['n_dims']
-    head['head']['one_dim']['n_indices'][0:n_dims_][index] = new_size
+    head['head']['one_dim'][index]['n_indices'] = new_size
 
 
 def mod_head_indices(head=None, index=0, indices=np.array([0])):
-    n_dims_ = head['head']['n_dims']
-    head['head']['one_dim']['n_indices'][0:n_dims_][index] = indices.size
+    head['head']['one_dim'][index]['n_indices'] = indices.size
     for i in range(indices.size):
-        head['head']['one_dim']['indices'][0:n_dims_][index][i] = indices[i]
+        head['head']['one_dim'][index]['indices'][i] = indices[i]
 
 
 def rm_head_index(head_=None, index_=0):
@@ -63,7 +60,7 @@ def rm_head_index(head_=None, index_=0):
     for i in range(0, n_dims_-1):
         if count == index_:
             count += 1
-        head_['head']['one_dim'][i] = head_tmp['head']['one_dim'][count]
+        head_['head']['one_dim'][i] = copy.deepcopy(head_tmp['head']['one_dim'][count])
         count += 1
 
 
