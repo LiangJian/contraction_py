@@ -53,14 +53,14 @@ def mod_head_indices(head=None, index=0, indices=np.array([0])):
 
 
 def rm_head_index(head_=None, index_=0):
-    n_dims_ = head_['head']['n_dims']
+    n_dims_ = copy.deepcopy(head_['head']['n_dims'])
     head_tmp = copy.deepcopy(head_)
     head_['head']['n_dims'] = n_dims_-1
     count = 0
     for i in range(0, n_dims_-1):
         if count == index_:
             count += 1
-        head_['head']['one_dim'][i] = copy.deepcopy(head_tmp['head']['one_dim'][count])
+        head_['head']['one_dim'][i] = head_tmp['head']['one_dim'][count]
         count += 1
 
 

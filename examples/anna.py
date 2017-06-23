@@ -24,7 +24,8 @@ twopf_jack = twopf_jack[:,:, 1:16:+1,:]+\
              twopf_jack[:,:,65:80:+1,:]+\
              twopf_jack[:,:,95:80:-1,:]
 twopf_jack /= 6.
-mod_head_dim_size(twopf_jack_head,twopf.find_name('t'),15)
+new_range = np.arange(1,16)
+mod_head_indices(twopf_jack_head,twopf.find_name('t'),new_range)
 twopf_jack = Var(data=twopf_jack,head_data=twopf_jack_head,init_method="array data")
 twopf_jack_ave = twopf_jack.get_jack_ave()
 twopf_jack_err = twopf_jack.get_jack_error()
@@ -33,7 +34,8 @@ mass_jack_ave = mass_jack.get_jack_ave()
 mass_jack_err = mass_jack.get_jack_error()
 
 for it in range(0,15):
-    print('%03d'%it,'\t%8.6e'%twopf_jack_ave[0,it,0],'\t%8.6e'%twopf_jack_err[0,it,0],'\t%8.6e'%mass_jack_ave[0,it,0],'\t%8.6e'%mass_jack_err[0,it,0])
+    print('%03d'%(twopf_jack_ave.indices['t'][it]),
+            '\t%8.6e'%twopf_jack_ave[0,it,0],'\t%8.6e'%twopf_jack_err[0,it,0],'\t%8.6e'%mass_jack_ave[0,it,0],'\t%8.6e'%mass_jack_err[0,it,0])
 
 if os.path.isfile('./anna/3pfs_mv1_ml2_ts1.npy') and not reload:
     threepf = Var(name='./anna/3pfs_mv1_ml2_ts1',init_method='Var_file')
@@ -54,8 +56,8 @@ threepf_jack /= 6.
 for i in range(1, threepf.shape[threepf.find_name('displacement')]):
     threepf_jack[:,:,:,:,:,:,i,:] += threepf_jack[:,:,:,:,:,:,i-1,:]
 
-mod_head_dim_size(threepf_jack_head,threepf.find_name('t'),15)
-mod_head_dim_size(threepf_jack_head,threepf.find_name('t2'),15)
+mod_head_indices(threepf_jack_head,threepf.find_name('t'),new_range)
+mod_head_indices(threepf_jack_head,threepf.find_name('t2'),new_range)
 threepf_jack = Var(data=threepf_jack,head_data=threepf_jack_head,init_method="array data")
 threepf_jack_ave = threepf_jack.get_jack_ave()
 threepf_jack_err = threepf_jack.get_jack_error()
