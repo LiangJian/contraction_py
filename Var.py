@@ -269,7 +269,7 @@ class Var(np.ndarray):
             exit(-1)
         new_head = copy.deepcopy(self.head_data) #FIXME #TODO
         rm_head_index(new_head,index_)
-        return Var(data=np.sum(self,index_),head_data=new_head,init_method="array data")
+        return Var(data=np.average(self,index_),head_data=new_head,init_method="array data")
 
     def save(self):
         np.save(self.name, self)
