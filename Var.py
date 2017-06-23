@@ -21,7 +21,7 @@ def do_jack(src,index_conf):
 
 def get_jack_error(src,index_conf):
     #return np.std(src,index_conf)/np.sqrt(src.shape[index_conf]-1.)*(src.shape[index_conf])
-    return np.std(src, index_conf) * np.sqrt(src.shape[index_conf])
+    return np.std(src, index_conf) * np.sqrt(src.shape[index_conf]-1)
 
 
 def combine(a_, b_, index_name_=''):
