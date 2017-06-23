@@ -43,6 +43,10 @@ def mod_head_name(head=None,index=0,new_name=''):
     head['head']['one_dim']['type'][0:n_dims_][index] = np.where(typename == new_name)[0][0]
 
 
+def mod_head_dim_size(head=None,index=0,new_size=0):
+    n_dims_ = head['head']['n_dims']
+    head['head']['one_dim']['n_indices'][0:n_dims_][index] = new_size
+
 def rm_head_index(head_=None,index_=0):
     n_dims_ = head_['head']['n_dims']
     head_tmp = copy.deepcopy(head_)
