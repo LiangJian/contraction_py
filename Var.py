@@ -48,6 +48,13 @@ def mod_head_dim_size(head=None, index=0, new_size=0):
     head['head']['one_dim']['n_indices'][0:n_dims_][index] = new_size
 
 
+def mod_head_indices(head=None, index=0, indices=np.array([0])):
+    n_dims_ = head['head']['n_dims']
+    head['head']['one_dim']['n_indices'][0:n_dims_][index] = indices.size
+    for i in range(indices.size):
+        head['head']['one_dim']['indices'][0:n_dims_][index][i] = indices[i]
+
+
 def rm_head_index(head_=None, index_=0):
     n_dims_ = head_['head']['n_dims']
     head_tmp = copy.deepcopy(head_)
