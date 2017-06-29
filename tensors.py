@@ -34,7 +34,7 @@ class Tensor:
                 count += 1
 
         same_name_list = [s for s in self.N if s in y_.N]
-        new_name_list = self.N + [s in y_.N if s not in same_name_list]
+        new_name_list = self.N + [s for s in y_.N if s not in same_name_list]
 
         self.rule = nickname1 + ',' + nickname2
 
