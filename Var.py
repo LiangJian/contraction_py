@@ -1,27 +1,7 @@
+from error_and_resample import *
 import numpy as np
 import os.path
 import copy
-
-
-def mass_eff_cosh(src, index_t):
-    return np.arccosh((np.roll(src, +1, index_t)+np.roll(src, -1, index_t))/(2.*src))
-
-
-def mass_eff_log(src, index_t):
-    return np.log(np.roll(src, +1, index_t)/src)
-
-
-def get_std_error(src, index_conf):
-    return np.std(src, index_conf)/np.sqrt(src.shape[index_conf]-1.)
-
-
-def do_jack(src, index_conf):
-    tmp = np.sum(src, index_conf, keepdims=True)
-    return (tmp-src)/(src.shape[index_conf]-1)
-
-
-def get_jack_error(src, index_conf):
-    return np.std(src, index_conf) * np.sqrt(src.shape[index_conf]-1)
 
 
 def combine(a_, b_, index_name_=''):
@@ -240,6 +220,15 @@ class Var(np.ndarray):
         mod_head_name(new_head,index_,'jackknife')
         return Var(data=do_jack(self,index_),head_data = new_head, init_method="array data")
 
+    def anti_jack(self):
+        index_ = self.find_name("jackknife")
+        if index_ == -1:
+            print("no index jackknife")
+            exit(-1)
+        new_head = self.head_data #FIXME #TODO
+        mod_head_name(new_head,index_,'conf')
+        return Var(data=do_anti_jack(self,index_),head_data = new_head, init_method="array data")
+
     def eff_mass_log(self):
         index_ = self.find_name("t")
         if index_ == -1:
@@ -265,11 +254,20 @@ class Var(np.ndarray):
     def get_jack_error(self):
         index_ = self.find_name("jackknife")
         if index_ == -1:
-            print("no index conf")
+            print("no index jackknife")
             exit(-1)
         new_head = copy.deepcopy(self.head_data) #FIXME #TODO
         rm_head_index(new_head,index_)
         return Var(data=get_jack_error(self,index_),head_data=new_head,init_method="array data")
+
+    def get_std_ave(self):
+        index_ = self.find_name("conf")
+        if index_ == -1:
+            print("no index conf")
+            exit(-1)
+        new_head = copy.deepcopy(self.head_data) #FIXME #TODO
+        rm_head_index(new_head,index_)
+        return Var(data=np.sum(self,index_)/self.shape[index_],head_data=new_head,init_method="array data")
 
     def get_jack_ave(self):
         index_ = self.find_name("jackknife")
